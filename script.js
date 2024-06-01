@@ -28,13 +28,48 @@ function Gameboard() {
     }
 
     let updateBoard = function(row, column, marker){
-        // check if space is empty and place marker if empty
+        // check for legal move
+        let valid = true
         if (board[row][column].getValue() === 0){
             board[row][column].updateValue(marker);
-            return
+            valid = true;
         } else {
-            return
+            valid = false
         }
+        
+        //check if all spots filled
+        let fullBoard = true;
+        for (let i = 0; i < rows; i++){
+            for (let j = 0; j < columns; j++){
+                let currentSpace = board[i][j].getValue();
+                if (currentSpace === 0){
+                    fullBoard = false;
+                    break
+                }
+            }
+            if (fullBoard === false){
+                break
+            }
+        }
+
+        //check for winner
+        let winner = false;
+
+        if (board[row][0].getValue() === marker && board[row][1].getValue() === marker && board[row][2].getValue() === marker){
+            winner = true;
+        } else if (board[0][column].getValue() === marker && board[1][column].getValue() === marker && board[2][column].getValue() === marker){
+            winner = true;
+        } else if(row === 0 && column === 0 || row === 1 && column === 1 || row === 2 && column === 2){
+            if (board[0][0].getValue() === marker && board[1][1].getValue() === marker && board[2][2].getValue() === marker){
+                winner = true;
+            }
+        } else if(row === 2 && column === 0 || row === 1 && column === 1 || row === 0 && column === 2) {
+            if (board[2][0].getValue() === marker && board[1][1].getValue() === marker && board[0][2].getValue() === marker){
+                winner = true;
+            }
+        }
+
+        return {valid, fullBoard, winner}
     }
 
     let displayBoard = function(){
@@ -87,28 +122,58 @@ function Gameflow(){
     console.log(playerCreation.players[1]);
 
     let activePlayer = playerCreation.players[0];
+    let gameOver = false;
     // play one round
-    function playRound(){
-        let playerRow = prompt(`${activePlayer.name}, you're up! What row do you want to place your marker in?`);
-        playerRow -= 1;
-        let playerColumn = prompt("What column do you want to go in?");
-        playerColumn -= 1;
-        playingBoard.updateBoard(playerRow, playerColumn, activePlayer.marker)
-        playingBoard.displayBoard();
-        if (activePlayer.playerNumber === 1){
-            activePlayer = playerCreation.players[1];
-        } else {
-            activePlayer = playerCreation.players[0];
+    const playRound = function(){
+        while(!gameOver){
+            //activePlayer selects move
+            let keepGoing = true;
+            let moveResults ;
+
+            while(keepGoing){
+                let playerRow = prompt(`${activePlayer.name}, you're up! What row do you want to place your marker in?`);
+                playerRow -= 1;
+                let playerColumn = prompt("What column do you want to go in?");
+                playerColumn -= 1;
+                moveResults = playingBoard.updateBoard(playerRow, playerColumn, activePlayer.marker);
+
+            // check if move is legal
+                if (moveResults.valid){
+                    keepGoing = false;
+                } else {
+                    console.log("Invalid Selection. Try again");
+                }
+            }
+
+            playingBoard.displayBoard();
+
+            // check for win condition or full board
+            if (moveResults.fullBoard){
+                console.log("GAME OVER");
+                return gameOver = true;
+                // return
+            }
+
+            if (moveResults.winner){
+                console.log(`${activePlayer.name} wins!`)
+                gameOver = true;
+                return
+            }
+
+            // change activePlayer
+            if (activePlayer.playerNumber === 1){
+                activePlayer = playerCreation.players[1];
+            } else {
+                activePlayer = playerCreation.players[0];
+            }
+
+            // playRound()
         }
-        
-        // add logic to check for playing in an already taken spot
-        // add logic to check for winner
     }
-
-    playRound();
-    playRound();
-
+    //playRound();
+    return {playRound}
 }
 
 
 let startGame = Gameflow();
+startGame.playRound();
