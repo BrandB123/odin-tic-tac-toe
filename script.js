@@ -73,18 +73,17 @@ function Gameboard() {
     }
 
     let displayBoard = function(){
-        let printingBoard = [];
         for (let i = 0; i < rows; i++){
-            printingBoard[i] = [];
             for (let j = 0; j < columns; j++){
+                let printingSpace = document.querySelector(`.row-${i}.column-${j}`);
                 if (board[i][j].getValue() === 0){
-                    printingBoard[i].push(" ");
+                    printingSpace.textContent = " ";
                 } else {
-                    printingBoard[i].push(board[i][j].getValue());
+                    printingSpace.textContent = board[i][j].getValue();
                 }
             }
+            document.querySelector(".class-1.class-2")
         }
-        console.log(printingBoard);
     }
 
     return {getBoard, updateBoard, displayBoard}
@@ -115,65 +114,81 @@ function Gameflow(){
     // set up players
     let player1 = prompt("Player 1 Name: ")
     playerCreation.createPlayer(player1);
-    console.log(playerCreation.players[0]);
+    let player1Title = document.querySelector(`.player-1`);
+    player1Title.textContent = playerCreation.players[0].name;
 
     let player2 = prompt("Player 2 Name: ")
     playerCreation.createPlayer(player2);
-    console.log(playerCreation.players[1]);
+    let player2Title = document.querySelector(`.player-2`);
+    player2Title.textContent = playerCreation.players[1].name;
 
     let activePlayer = playerCreation.players[0];
-    let gameOver = false;
-    // play one round
-    const playRound = function(){
-        while(!gameOver){
-            //activePlayer selects move
-            let keepGoing = true;
-            let moveResults ;
+    let activePlayerTitle = document.querySelector(`.player-${activePlayer.playerNumber}`);
+    activePlayerTitle.style.color = "red";
 
-            while(keepGoing){
-                let playerRow = prompt(`${activePlayer.name}, you're up! What row do you want to place your marker in?`);
-                playerRow -= 1;
-                let playerColumn = prompt("What column do you want to go in?");
-                playerColumn -= 1;
-                moveResults = playingBoard.updateBoard(playerRow, playerColumn, activePlayer.marker);
+    // play one round
+    // let gameOver = false;
+    let body = document.querySelector("body");
+    let endGameAnnouncement = document.createElement("div");
+    endGameAnnouncement.className = "end-game";
+
+    const playRound = function(event){
+        //activePlayer selects move
+        let keepGoing = true;
+        let moveResults ;
+
+        while(keepGoing){
+            let target = event.target.classList;
+            let playerRow = target[1];
+            playerRow = playerRow.split("-");
+            playerRow = Number(playerRow[1]);
+            let playerColumn = target[2];
+            playerColumn = playerColumn.split("-");
+            playerColumn = Number(playerColumn[1]);
+            moveResults = playingBoard.updateBoard(playerRow, playerColumn, activePlayer.marker);
 
             // check if move is legal
-                if (moveResults.valid){
-                    keepGoing = false;
-                } else {
-                    console.log("Invalid Selection. Try again");
-                }
-            }
-
-            playingBoard.displayBoard();
-
-            // check for win condition or full board
-            if (moveResults.fullBoard){
-                console.log("GAME OVER");
-                return gameOver = true;
-                // return
-            }
-
-            if (moveResults.winner){
-                console.log(`${activePlayer.name} wins!`)
-                gameOver = true;
-                return
-            }
-
-            // change activePlayer
-            if (activePlayer.playerNumber === 1){
-                activePlayer = playerCreation.players[1];
+            if (moveResults.valid){
+                keepGoing = false;
             } else {
-                activePlayer = playerCreation.players[0];
+                console.log("Invalid Selection. Try again");
             }
-
-            // playRound()
         }
+
+        playingBoard.displayBoard();
+
+        // check for win condition or full board
+        if (moveResults.winner){
+            endGameAnnouncement.textContent = `${activePlayer.name} wins!`;
+            body.appendChild(endGameAnnouncement);
+            console.log(`${activePlayer.name} wins!`)
+            return
+        }
+
+        if (moveResults.fullBoard){
+            endGameAnnouncement.textContent = "GAME OVER";
+            body.appendChild(endGameAnnouncement);
+            console.log("GAME OVER");
+            return
+        }
+
+        // change activePlayer
+        let activePlayerTitle = document.querySelector(`.player-${activePlayer.playerNumber}`);
+        activePlayerTitle.style.color = "#eee";
+        if (activePlayer.playerNumber === 1){
+            activePlayer = playerCreation.players[1];
+        } else {
+            activePlayer = playerCreation.players[0];
+        }
+        activePlayerTitle = document.querySelector(`.player-${activePlayer.playerNumber}`);
+        activePlayerTitle.style.color = "red";
     }
-    //playRound();
     return {playRound}
 }
 
-
 let startGame = Gameflow();
-startGame.playRound();
+
+let gameContainer = document.querySelector(".game-container");
+gameContainer.addEventListener("click", (event) => {
+    startGame.playRound(event);
+})
