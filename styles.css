@@ -1,0 +1,51 @@
+body{
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.header{
+    display: grid;
+    width: 100%;
+    grid-template: 20px / repeat(3, 1fr);
+    padding-top: 30px;
+}
+
+.player-1, .title, .player-2{
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: #eee;
+}
+
+.title{
+    font-size: 48px;;
+}
+
+
+.game-container{
+    flex: 1 1 auto;
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    justify-content: center;
+    align-items: center;
+    margin: 100px;
+}
+
+.cell{
+    border: 1px solid #333;
+    background-color: #ccc;
+    font-size: 77px;
+    height: 120px;
+    width: 120px;
+    padding: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
